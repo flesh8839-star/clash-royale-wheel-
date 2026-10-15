@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clash Royale — Колесо колод</title>
+<style>
+:root{--bg:#10182b;--panel:#192640;--gold:#ffd34e;--blue:#58c8ff;--text:#f4f7ff;--muted:#aebbd3}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#243c67 0,#10182b 52%,#090e19 100%);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+.wrap{max-width:1050px;margin:auto;padding:22px 16px 40px}.hero{text-align:center;margin-bottom:20px}.tag{display:inline-block;padding:6px 12px;border:1px solid #45648e;border-radius:999px;color:#b9eaff;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+h1{font-size:clamp(28px,5vw,46px);margin:10px 0 5px;line-height:1.08}h1 span{color:var(--gold)}.sub{color:var(--muted);margin:0}
+.layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:18px;align-items:start}
+.panel{background:linear-gradient(180deg,#1b2a46,#141f35);border:1px solid #314768;border-radius:22px;padding:18px;box-shadow:0 18px 45px #0004}
+.wheelbox{position:relative;width:min(100%,470px);margin:0 auto}.wheelbox:after{content:"";position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:17px solid transparent;border-right:17px solid transparent;border-top:35px solid var(--gold);filter:drop-shadow(0 3px 2px #0008);z-index:3}
+canvas{width:100%;height:auto;display:block;filter:drop-shadow(0 12px 20px #0005)}
+.spinrow{display:flex;gap:10px;justify-content:center;align-items:center;margin-top:16px;flex-wrap:wrap}
+button{border:0;border-radius:13px;padding:13px 18px;font-weight:800;font-size:15px;cursor:pointer;transition:transform .15s,filter .15s}
+button:hover{filter:brightness(1.08);transform:translateY(-1px)}button:disabled{opacity:.55;cursor:wait;transform:none}
+.primary{background:linear-gradient(180deg,#ffe77b,#ffbd24);color:#382500;box-shadow:0 5px 0 #b87810}.secondary{background:#263a5b;color:#eaf3ff;border:1px solid #45618a}
+.note{text-align:center;color:var(--muted);font-size:12px;margin:13px 0 0}
+.resultTitle{display:flex;justify-content:space-between;align-items:center;gap:10px}.resultTitle h2{margin:0;font-size:23px}.pill{background:#263b5b;color:#bdeaff;border-radius:999px;padding:5px 9px;font-size:12px;white-space:nowrap}
+.deckname{font-size:20px;font-weight:850;color:var(--gold);margin:12px 0 4px}.deckdesc{color:var(--muted);font-size:13px;margin:0 0 15px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.card{background:linear-gradient(155deg,#304c77,#1d2b47);border:1px solid #4d6b95;border-radius:13px;min-height:95px;padding:10px 5px 8px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.elixir{align-self:flex-start;background:#d7a8ff;color:#35145b;border-radius:7px;font-size:11px;font-weight:900;padding:2px 6px;margin:-3px 0 0 0}
+.emoji{font-size:27px;line-height:1.1}.cardname{font-size:11px;line-height:1.2;font-weight:750;overflow-wrap:anywhere}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px}.stat{background:#111c30;border-radius:12px;padding:10px;text-align:center}.stat b{display:block;color:var(--blue);font-size:18px}.stat span{font-size:11px;color:var(--muted)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.tools button{flex:1;min-width:120px;padding:10px;font-size:13px}
+.listhead{display:flex;justify-content:space-between;align-items:center;margin:20px 0 10px}.listhead h3{margin:0;font-size:17px}.listhead small{color:var(--muted)}
+.decklist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.deckitem{background:#111c30;border:1px solid #2b405f;border-radius:12px;padding:10px;text-align:left;color:var(--text);display:block;width:100%}.deckitem strong{display:block;font-size:13px;margin-bottom:5px}.deckitem span{color:var(--muted);font-size:11px;line-height:1.35;display:block}
+footer{text-align:center;color:#8192af;font-size:12px;margin-top:20px}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.panel{padding:14px}.decklist{grid-template-columns:1fr 1fr}.card{min-height:90px}.wrap{padding:16px 12px 30px}}
+@media(max-width:390px){.decklist{grid-template-columns:1fr}.cardname{font-size:10px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero"><div class="tag">Arena randomizer · fan-made</div><h1>Колесо <span>колод</span></h1><p class="sub">Крути и получай случайную колоду из 8 карт</p></header>
+<main class="layout">
+<section class="panel">
+<div class="wheelbox"><canvas id="wheel" width="900" height="900" aria-label="Колесо случайных колод"></canvas></div>
+<div class="spinrow"><button class="primary" id="spin">🎡 КРУТИТЬ КОЛЕСО</button><button class="secondary" id="random">🎲 Случайная</button></div>
+<p class="note">Колесо выбирает одну из колод ниже. Нажми на колоду в списке, чтобы посмотреть её.</p>
+</section>
+<section class="panel" aria-live="polite">
+<div class="resultTitle"><h2>Твоя колода</h2><span class="pill" id="number">Колодa #1</span></div>
+<div class="deckname" id="deckName">Hog 2.6</div><p class="deckdesc" id="deckDesc">Быстрая цикл-колода · средняя стоимость эликсира</p>
+<div class="cards" id="cards"></div>
+<div class="stats"><div class="stat"><b id="avg">2.6</b><span>ср. эликсир</span></div><div class="stat"><b>8</b><span>карт в колоде</span></div><div class="stat"><b id="style">Цикл</b><span>стиль игры</span></div></div>
+<div class="tools"><button class="secondary" id="copy">📋 Скопировать колоду</button><button class="secondary" id="again">↻ Ещё раз</button></div>
+<div class="listhead"><h3>Колоды в колесе</h3><small id="count"></small></div>
+<div class="decklist" id="decklist"></div>
+</section>
+</main>
+<footer>Фанатский инструмент. Неофициальный сайт Clash Royale. Список колод можно расширять прямо в коде.</footer>
+</div>
+<script>
+const card=(name,elixir,emoji)=>({name,elixir,emoji});
+const decks=[
+{name:"Hog 2.6",style:"Цикл",desc:"Быстрая цикл-колода с Мортирой? Нет — ставка на Всадника на кабане.",cards:[card("Всадник на кабане",4,"🐗"),card("Мушкетёр",4,"🎯"),card("Ледяной голем",2,"🧊"),card("Скелеты",1,"💀"),card("Ледяной дух",1,"❄️"),card("Пушка",3,"🏰"),card("Огненный шар",4,"🔥"),card("Разряд",2,"⚡")]},
+{name:"Log Bait",style:"Контроль",desc:"Выманивай небольшие заклинания и дави Принцессой с Бочкой гоблинов.",cards:[card("Бочка с гоблинами",3,"🛢️"),card("Принцесса",3,"🏹"),card("Рыцарь",3,"🛡️"),card("Инферно-башня",5,"🔥"),card("Армия скелетов",3,"💀"),card("Ледяной дух",1,"❄️"),card("Ракета",6,"🚀"),card("Бревно",2,"🪵")]},
+{name:"Giant Double Prince",style:"Напор",desc:"Тяжёлый пуш с Гигантом и двумя принцами.",cards:[card("Гигант",5,"👑"),card("Принц",5,"🐎"),card("Тёмный принц",4,"🖤"),card("Мега-миньон",3,"🦇"),card("Электромаг",4,"⚡"),card("Разряд",2,"⚡"),card("Огненный шар",4,"🔥"),card("Миньоны",3,"🦇")]},
+{name:"P.E.K.K.A Bridge Spam",style:"Контратака",desc:"Наказывай соперника быстрыми атаками по мосту.",cards:[card("П.Е.К.К.А",7,"🤖"),card("Боевой таран",4,"🐏"),card("Королевский призрак",3,"👻"),card("Бандитка",3,"🥷"),card("Электромаг",4,"⚡"),card("Отравление",4,"☠️"),card("Боевой целитель",4,"💚"),card("Разряд",2,"⚡")]},
+{name:"LavaLoon",style:"Воздух",desc:"Собери воздушную атаку вокруг Лавовой гончей и Шара.",cards:[card("Лавовая гончая",7,"🌋"),card("Воздушный шар",5,"🎈"),card("Мега-миньон",3,"🦇"),card("Дракончик",4,"🐉"),card("Надгробие",3,"🪦"),card("Стрелы",3,"🏹"),card("Огненный шар",4,"🔥"),card("Стражи",3,"🛡️")]},
+{name:"X-Bow Cycle",style:"Осада",desc:"Защищай арбалет и контролируй темп быстрым циклом.",cards:[card("Арбалет",6,"🏹"),card("Тесла",4,"⚡"),card("Рыцарь",3,"🛡️"),card("Лучницы",3,"🏹"),card("Скелеты",1,"💀"),card("Ледяной дух",1,"❄️"),card("Огненный шар",4,"🔥"),card("Бревно",2,"🪵")]},
+{name:"Royal Giant Fisherman",style:"Контроль",desc:"Королевский гигант наносит урон, Рыбак вытягивает защитников.",cards:[card("Королевский гигант",6,"👑"),card("Рыбак",3,"🎣"),card("Охотник",4,"🎯"),card("Королевский призрак",3,"👻"),card("Электродух",1,"⚡"),card("Скелеты",1,"💀"),card("Молния",6,"🌩️"),card("Бревно",2,"🪵")]},
+{name:"Golem Beatdown",style:"Тяжёлая атака",desc:"Накапливай эликсир и строй мощный пуш за Големом.",cards:[card("Голем",8,"🪨"),card("Ночная ведьма",4,"🧙"),card("Дровосек",4,"🪓"),card("Малыш-дракон",4,"🐉"),card("Мегаминьон",3,"🦇"),card("Торнадо",3,"🌪️"),card("Молния",6,"🌩️"),card("Варвары",5,"⚔️")]},
+{name:"Miner Poison",style:"Контроль",desc:"Постепенно забирай башню Майнером и Отравлением.",cards:[card("Шахтёр",3,"⛏️"),card("Отравление",4,"☠️"),card("Бомбёр",2,"💣"),card("Башня-бомбёжка",4,"💣"),card("Валькирия",4,"🪓"),card("Летучие мыши",2,"🦇"),card("Стражи",3,"🛡️"),card("Бревно",2,"🪵")]},
+{name:"Royal Hogs Earthquake",style:"Давление",desc:"Королевские кабаны и Землетрясение давят на постройки.",cards:[card("Королевские кабаны",5,"🐗"),card("Землетрясение",3,"🌎"),card("Королевские рекруты",7,"🛡️"),card("Летающая машина",4,"🚁"),card("Королевский призрак",3,"👻"),card("Огненный дух",1,"🔥"),card("Королевская доставка",3,"📦"),card("Стрелы",3,"🏹")]},
+{name:"Mortar Miner",style:"Осада",desc:"Мортира держит дистанцию, Майнер помогает добивать башню.",cards:[card("Мортира",4,"🏰"),card("Шахтёр",3,"⛏️"),card("Лучницы",3,"🏹"),card("Рыцарь",3,"🛡️"),card("Гоблины",2,"👺"),card("Летучие мыши",2,"🦇"),card("Огненный шар",4,"🔥"),card("Бревно",2,"🪵")]},
+{name:"Splashyard",style:"Контроль",desc:"Кладбище под прикрытием ядовитого заклинания и сплэш-защиты.",cards:[card("Кладбище",5,"⚰️"),card("Отравление",4,"☠️"),card("Рыцарь",3,"🛡️"),card("Ледяной маг",3,"🧊"),card("Малыш-дракон",4,"🐉"),card("Надгробие",3,"🪦"),card("Торнадо",3,"🌪️"),card("Варварская бочка",2,"🛢️")]},
+{name:"Electro Giant",style:"Контратака",desc:"Электрогигант продвигается вперёд под прикрытием поддержки.",cards:[card("Электрогигант",7,"⚡"),card("Бомбёр",2,"💣"),card("Тёмный принц",4,"🖤"),card("Тесла",4,"⚡"),card("Торнадо",3,"🌪️"),card("Молния",6,"🌩️"),card("Скелеты",1,"💀"),card("Варварская бочка",2,"🛢️")]},
+{name:"Goblin Drill",style:"Давление",desc:"Сверло появляется у башни, пока дешёвые карты защищают.",cards:[card("Гоблинское сверло",4,"🛠️"),card("Валькирия",4,"🪓"),card("Бомбёр",2,"💣"),card("Башня-бомбёжка",4,"💣"),card("Яд",4,"☠️"),card("Скелеты",1,"💀"),card("Летучие мыши",2,"🦇"),card("Бревно",2,"🪵")]},
+{name:"Three Musketeers",style:"Разделение",desc:"Разделяй давление по линиям и ловись на ошибках защиты.",cards:[card("Три мушкетёра",9,"🎯"),card("Королевские кабаны",5,"🐗"),card("Ледяной голем",2,"🧊"),card("Эликсирный голем",3,"🟣"),card("Разряд",2,"⚡"),card("Летучие мыши",2,"🦇"),card("Варварская бочка",2,"🛢️"),card("Пушка",3,"🏰")]},
+{name:"Mega Knight Ram",style:"Контратака",desc:"Мега-рыцарь останавливает пуш и помогает контратаковать.",cards:[card("Мега-рыцарь",7,"🦾"),card("Боевой таран",4,"🐏"),card("Бандитка",3,"🥷"),card("Летучие мыши",2,"🦇"),card("Адская гончая",3,"🔥"),card("Разряд",2,"⚡"),card("Стрелы",3,"🏹"),card("Электромаг",4,"⚡")]},
+{name:"Giant Graveyard",style:"Напор",desc:"Гигант танкует для Кладбища, заклинания помогают атаке.",cards:[card("Гигант",5,"👑"),card("Кладбище",5,"⚰️"),card("Ведьма",5,"🧙"),card("Мега-миньон",3,"🦇"),card("Мини П.Е.К.К.А",4,"🤖"),card("Стрелы",3,"🏹"),card("Разряд",2,"⚡"),card("Надгробие",3,"🪦")]},
+{name:"Classic Giant Graveyard",style:"Контроль",desc:"Обороняйся экономно, затем переходи в контратаку.",cards:[card("Гигант",5,"👑"),card("Кладбище",5,"⚰️"),card("Ледяной маг",3,"🧊"),card("Малыш-дракон",4,"🐉"),card("Могильщик",3,"🪦"),card("Торнадо",3,"🌪️"),card("Яд",4,"☠️"),card("Бревно",2,"🪵")]},
+{name:"Double Barrel Bait",style:"Приманка",desc:"Заставляй соперника тратить заклинания не туда.",cards:[card("Бочка с гоблинами",3,"🛢️"),card("Бочка со скелетами",3,"💀"),card("Принцесса",3,"🏹"),card("Рыцарь",3,"🛡️"),card("Инферно-башня",5,"🔥"),card("Армия скелетов",3,"💀"),card("Ракета",6,"🚀"),card("Бревно",2,"🪵")]},
+{name:"Balloon Freeze",style:"Воздух",desc:"Лови момент для Шара и Заморозки.",cards:[card("Воздушный шар",5,"🎈"),card("Заморозка",4,"🧊"),card("Ледяной голем",2,"🧊"),card("Мушкетёр",4,"🎯"),card("Ледяной дух",1,"❄️"),card("Скелеты",1,"💀"),card("Надгробие",3,"🪦"),card("Бревно",2,"🪵")]},
+{name:"Pigs Cycle",style:"Цикл",desc:"Постоянное давление Королевскими кабанами и быстрый возврат к ним.",cards:[card("Королевские кабаны",5,"🐗"),card("Мушкетёр",4,"🎯"),card("Валькирия",4,"🪓"),card("Пушка",3,"🏰"),card("Скелеты",1,"💀"),card("Ледяной дух",1,"❄️"),card("Землетрясение",3,"🌎"),card("Бревно",2,"🪵")]}
+];
+const $=id=>document.getElementById(id);let current=0,spinning=false,rotation=0;
+const canvas=$("wheel"),ctx=canvas.getContext("2d"),N=decks.length,colors=["#2c7fc0","#7046b8","#d94f68","#d78a26","#279c83","#3c5fc4","#b34c91","#648b2d"];
+function drawWheel(angle=0){
+ const w=canvas.width,c=w/2,r=415,step=2*Math.PI/N;ctx.clearRect(0,0,w,w);
+ ctx.save();ctx.translate(c,c);ctx.rotate(angle);
+ for(let i=0;i<N;i++){let a=-Math.PI/2+i*step,b=a+step;ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,a,b);ctx.closePath();ctx.fillStyle=colors[i%colors.length];ctx.fill();ctx.strokeStyle="#f7d779";ctx.lineWidth=4;ctx.stroke();
+ ctx.save();ctx.rotate(a+step/2);ctx.textAlign="right";ctx.fillStyle="#fff";ctx.shadowColor="#0008";ctx.shadowBlur=5;ctx.font="bold 23px system-ui";let label=decks[i].name;if(label.length>21)label=label.slice(0,19)+"…";ctx.fillText(label,r-28,8);ctx.restore();}
+ ctx.beginPath();ctx.arc(0,0,76,0,Math.PI*2);ctx.fillStyle="#10182b";ctx.fill();ctx.strokeStyle="#ffe27b";ctx.lineWidth=9;ctx.stroke();ctx.fillStyle="#ffe27b";ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="bold 25px system-ui";ctx.fillText("CLASH",0,-13);ctx.fillText("ROYALE",0,18);ctx.restore();
+}
+function renderDeck(index){current=index;let d=decks[index];$("number").textContent=`Колода #${index+1} / ${N}`;$("deckName").textContent=d.name;$("deckDesc").textContent=d.desc;$("style").textContent=d.style;
+ const avg=d.cards.reduce((s,c)=>s+c.elixir,0)/8;$("avg").textContent=avg.toFixed(1);
+ $("cards").innerHTML=d.cards.map(c=>`<div class="card"><span class="elixir">${c.elixir} 💧</span><span class="emoji">${c.emoji}</span><span class="cardname">${c.name}</span></div>`).join("");
+ document.querySelectorAll(".deckitem").forEach((el,i)=>el.style.borderColor=i===index?"#ffd34e":"#2b405f");
+}
+function buildList(){$("count").textContent=`${N} колод`; $("decklist").innerHTML=decks.map((d,i)=>`<button class="deckitem" data-i="${i}"><strong>${i+1}. ${d.name}</strong><span>${d.cards.map(c=>c.name).join(" · ")}</span></button>`).join("");$("decklist").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>renderDeck(Number(b.dataset.i))))}
+function chooseRandom(){if(spinning)return;let next=Math.floor(Math.random()*N);if(next===current)next=(next+1+Math.floor(Math.random()*(N-1)))%N;renderDeck(next);rotation=0;drawWheel(rotation)}
+function spin(){if(spinning)return;spinning=true;$("spin").disabled=true;$("random").disabled=true;$("again").disabled=true;let target=Math.floor(Math.random()*N),step=2*Math.PI/N;let normalized=((-(target*step+step/2))%(2*Math.PI)+2*Math.PI)%(2*Math.PI);let start=rotation,extra=6*2*Math.PI+normalized;let duration=4200,startTime=null;
+ function frame(t){if(!startTime)startTime=t;let p=Math.min(1,(t-startTime)/duration),ease=1-Math.pow(1-p,4);rotation=start+extra*ease;drawWheel(rotation);if(p<1)requestAnimationFrame(frame);else{rotation=((rotation%(2*Math.PI))+2*Math.PI)%(2*Math.PI);renderDeck(target);spinning=false;$("spin").disabled=false;$("random").disabled=false;$("again").disabled=false;$("spin").textContent="🎡 КРУТИТЬ ЕЩЁ";}}
+ requestAnimationFrame(frame)}
+$("spin").addEventListener("click",spin);$("random").addEventListener("click",chooseRandom);$("again").addEventListener("click",spin);
+$("copy").addEventListener("click",async()=>{let d=decks[current],txt=`${d.name}\n${d.cards.map((c,i)=>`${i+1}. ${c.name} (${c.elixir})`).join("\n")}\nСредний эликсир: ${$("avg").textContent}`;try{await navigator.clipboard.writeText(txt);$("copy").textContent="✅ Скопировано!";setTimeout(()=>$("copy").textContent="📋 Скопировать колоду",1800)}catch(e){window.prompt("Скопируй колоду:",txt)}});
+buildList();renderDeck(0);drawWheel();
+</script>
+</body></html>
